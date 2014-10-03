@@ -43,7 +43,8 @@ func (w work) String() string {
 		status = "ERROR"
 	}
 
-	return fmt.Sprintf("%s,%s,%d,%s", w.domainName, status, w.when.Unix(), w.orderid)
+	return fmt.Sprintf("%s,%s,%d,%s", w.domainName, status, w.when.Unix(),
+		w.orderid)
 }
 
 func worker(in, out chan work, done chan bool) {
@@ -65,10 +66,13 @@ func worker(in, out chan work, done chan bool) {
 		// version of the domain name
 
 		if z.err == nil {
-			if cname.Rcode == dns.RcodeSuccess && len(cname.Answer) == 1 {
+			switch {
+			case cname.Rcode == dns.RcodeSuccess && len(cname.Answer) == 1:
 				z.good = strings.HasSuffix(cname.Answer[0].String(),
 					"CNAME\t" + z.sha1 + ".comodoca.com.")
-			} else {
+			case cname.Rcode == dns.RcodeNameError:
+				z.good = false
+			default:
 				z.err = fmt.Errorf("DNS Rcode: %s, Answers: %d",
 					dns.RcodeToString[cname.Rcode],
 					len(cname.Answer))
@@ -102,7 +106,8 @@ func filler(in chan work) {
 				parts = append(parts, "na")
 			}
 
-			in <- work{domainName: parts[0], md5: parts[1], sha1: parts[2], orderid: parts[3]}
+			in <- work{domainName: parts[0], md5: parts[1], sha1: parts[2],
+				orderid: parts[3]}
 		}
 	}
 

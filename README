@@ -26,7 +26,7 @@ The comodo program has a single parameter
 Example execution
 -----------------
 
-    $ cat list_of_domains_with_hashes | ./comodo -workers=500
+    $ cat list_of_domains_with_hashes | bin/comodo -workers=500
 
 If a parsing error occurs (i.e. a bad line in the input file) then an error
 will be output on STDERR.
