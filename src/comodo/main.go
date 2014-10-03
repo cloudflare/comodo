@@ -83,10 +83,14 @@ func worker(in, out chan work, done chan bool) {
 func filler(in chan work) {
 	s := bufio.NewScanner(os.Stdin)
 	for s.Scan() {
+		line := strings.TrimSpace(s.Text())
+		if line == "" {
+			continue
+		}
 
 		// Expected format is domainname,md5,sha1
 
-		parts := strings.Split(strings.TrimSpace(s.Text()), ",")
+		parts := strings.Split(line, ",")
 		if len(parts) != 3 {
 			fmt.Fprintf(os.Stderr, "Bad input line %s", s.Text())
 		} else {
