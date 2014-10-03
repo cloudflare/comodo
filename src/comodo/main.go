@@ -20,6 +20,7 @@ type work struct {
 	domainName string // The domain name to check
     md5 string        // Magic MD5 value
 	sha1 string       // Magic SHA1 value
+	orderid string    // The Comodo orderid
 
 	// Set when the work job has been processed
 
@@ -42,7 +43,7 @@ func (w work) String() string {
 		status = "ERROR"
 	}
 
-	return fmt.Sprintf("%s,%s,%d", w.domainName, status, w.when.Unix())
+	return fmt.Sprintf("%s,%s,%d,%s", w.domainName, status, w.when.Unix(), w.orderid)
 }
 
 func worker(in, out chan work, done chan bool) {
@@ -88,17 +89,20 @@ func filler(in chan work) {
 			continue
 		}
 
-		// Expected format is domainname,md5,sha1
+		// Expected format is domainname,md5,sha1,orderid
 
 		parts := strings.Split(line, ",")
-		if len(parts) != 3 {
+		if len(parts) < 3 {
 			fmt.Fprintf(os.Stderr, "Bad input line %s", s.Text())
 		} else {
 			for i := 0; i < len(parts); i++ {
 				parts[i] = strings.TrimSpace(parts[i])
 			}
+			if len(parts) == 3 {
+				parts = append(parts, "na")
+			}
 
-			in <- work{domainName: parts[0], md5: parts[1], sha1: parts[2]}
+			in <- work{domainName: parts[0], md5: parts[1], sha1: parts[2], orderid: parts[3]}
 		}
 	}
 

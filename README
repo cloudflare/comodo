@@ -4,11 +4,11 @@ comodo domain verifier
 This program expects to receive a list of domains to be validated on STDIN
 where each line consists of:
 
-    domainname,md5,sha1
+    domainname,md5,sha1,orderid
 
 and it will output CSV lines as follows
 
-    domainname,status,timestamp
+    domainname,status,timestamp,orderid
 
 The status will be one of
 
