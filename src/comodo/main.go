@@ -43,8 +43,8 @@ func (w work) String() string {
 		status = "ERROR"
 	}
 
-	return fmt.Sprintf("%s,%s,%d,%s", w.domainName, status, w.when.Unix(),
-		w.orderid)
+	return fmt.Sprintf("%s,%s,%s,%s,%s,%d", w.domainName, w.md5, w.sha1,
+		w.orderid, status, w.when.Unix())
 }
 
 func worker(in, out chan work, done chan bool) {

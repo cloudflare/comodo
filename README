@@ -8,7 +8,7 @@ where each line consists of:
 
 and it will output CSV lines as follows
 
-    domainname,status,timestamp,orderid
+    domainname,md5,sha1,orderid,status,timestamp
 
 The status will be one of
 
