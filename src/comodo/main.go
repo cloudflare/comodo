@@ -8,11 +8,13 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"net"
+	"github.com/miekg/dns"
 	"os"
 	"strings"
 	"time"
 )
+
+var resolver *string
 
 type work struct {
 	domainName string // The domain name to check
@@ -40,31 +42,36 @@ func (w work) String() string {
 		status = "ERROR"
 	}
 
-	return fmt.Sprintf("%s,%s,%s", w.domainName, status, w.when.UTC())
+	return fmt.Sprintf("%s,%s,%d", w.domainName, status, w.when.Unix())
 }
 
 func worker(in, out chan work, done chan bool) {
+	c := dns.Client{}
+
 	for z := range in {
 
 		// Construct the input name from the MD5 value and the domain name
 
 		z.when = time.Now()
-		name := z.md5 + "." + z.domainName
+		name := z.md5 + "." + z.domainName + "."
 
-		fmt.Printf("%#v\n", z)
-		fmt.Printf("%#v\n", name)
-
-		var cname string
-		cname, z.err = net.LookupCNAME(name)
-
-		fmt.Printf("%#v\n", cname)
-		fmt.Printf("%#v\n", z.err)
+		var cname *dns.Msg
+		m := &dns.Msg{}
+		m.SetQuestion(name, dns.TypeCNAME)
+		cname, _, z.err = c.Exchange(m, *resolver + ":53")
 
 		// If no network error then check that the CNAME points to the SHA1
 		// version of the domain name
 
 		if z.err == nil {
-			z.good = cname == z.sha1 + ".comodoca.com"
+			if cname.Rcode == dns.RcodeSuccess && len(cname.Answer) == 1 {
+				z.good = strings.HasSuffix(cname.Answer[0].String(),
+					"CNAME\t" + z.sha1 + ".comodoca.com.")
+			} else {
+				z.err = fmt.Errorf("DNS Rcode: %s, Answers: %d",
+					dns.RcodeToString[cname.Rcode],
+					len(cname.Answer))
+			}
 		}
 
 		out <- z
@@ -100,6 +107,8 @@ func filler(in chan work) {
 
 func main() {
 	workers := flag.Int("workers", 10, "Number of workers to run")
+	resolver = flag.String("resolver", "8.8.8.8",
+		"Address host or host:port of DNS resolver")
 	flag.Parse()
 	
 	in := make(chan work)

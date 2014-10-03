@@ -20,6 +20,8 @@ The status will be one of
 The comodo program has a single parameter
 
     -workers  The number of worker "threads" to run to perform validation
+   
+    -resolver IP address of resolver (defaults to 8.8.8.8)
 
 Example execution
 -----------------
