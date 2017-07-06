@@ -1,0 +1,13 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "4HGCMjC/2jt2TJyz08RH3jl6RGk=",
+			"path": "github.com/miekg/dns",
+			"revision": "26be1abce9d8a7b4f3f1dcb8755638e1a28ffe31",
+			"revisionTime": "2017-07-06T22:55:11Z"
+		}
+	],
+	"rootPath": "github.com/cloudflare/comodo"
+}
